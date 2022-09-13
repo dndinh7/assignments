@@ -6,7 +6,7 @@
 
 // This function will print out the rules and instructions of the game
 void instructions() {
-  printf("Welcome to WORDLE!\nGuess the 5-letter word in 6 guesses!\nLetters guessed in the correct position will be shown.\nLetters guessed correctly, but not in the right position will be shown as *.\nLetters not in the word will appear as #.\nYou lose after 6 wrong guesses.\n\n");
+  printf("Welcome to WORDLE!\nGuess the 5-letter word in 6 guesses!\nLetters guessed in the correct position will be shown.\nLetters in the word, but not in the right position will be shown as *.\nLetters not in the word will appear as #.\nYou lose after 6 wrong guesses.\n\n");
 }
 
 // allows the user to guess the word
