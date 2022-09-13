@@ -34,7 +34,7 @@ int main() {
   restaurant[3].closing_hour= 20;
   restaurant[3].rating= 3.8;
   
-  printf("Some local favorite restaurants.\n\n");
+  printf("A list of some local-favorite restaurants.\n\n");
 
   printf("What hour is it (24 hr clock)? ");
   scanf("%d", &hour);
