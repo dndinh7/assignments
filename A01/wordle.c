@@ -9,8 +9,10 @@ void instructions() {
   printf("Welcome to WORDLE!\nGuess the 5-letter word in 6 guesses!\nLetters guessed in the correct position will be shown.\nLetters in the word, but not in the right position will be shown as *.\nLetters not in the word will appear as #.\nYou lose after 6 wrong guesses.\n\n");
 }
 
-// allows the user to guess the word
-// creates a local buffer for guess (maybe I should have just gave guess more memory)
+// Function for user to guess the word, and has to be a 5 letter word.
+// Note that if the user puts a string that is more than 64 (63 plus temrinating),
+// then the letters will overflow to the next array that is allocated right after
+// guess
 void GuessWord(char guess[]) {
   printf("Your Guess: ");  
   scanf("%s", guess);
@@ -23,7 +25,7 @@ void GuessWord(char guess[]) {
 
 }
 
-// 
+// this function finds letters in the word, but not in the correct positions 
 void find_chars(char word[], char guess[], char positions[], int letters_used[]) {
   for (int i= 0; i < 5; i++) {
     if (positions[i] == '#') {
@@ -51,6 +53,7 @@ void correct_positions(char positions[], char word[], char guess[], int letters_
   }
 }
 
+// this resets positions, guess, and letters_used array
 void reset(char positions[], char guess[], int letters_used[]) {
   strcpy(guess, "");
   for (int i= 0; i < 5; i++) {
@@ -70,6 +73,7 @@ void print_grid(char grid[][6], char grid_guess[][6]) {
   }
   printf("\n");
 }
+
 int main() {
   // set seed
   srand(time(0));
@@ -77,8 +81,8 @@ int main() {
   int guesses_left= 6;
   char word[6];
   char guess[64];
-  char positions[6]= {'#', '#', '#', '#', '#', '\0'};
-  int  letters_used[5]= {0, 0, 0, 0, 0};
+  char positions[6]= {'#', '#', '#', '#', '#', '\0'}; // corresponds to the letters in the word
+  int  letters_used[5]= {0, 0, 0, 0, 0}; // corresponds to the letters seen in guess
 
   // initialize the grid of guesses
   char grid[6][6];
