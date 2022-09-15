@@ -10,18 +10,17 @@ void instructions() {
 }
 
 // allows the user to guess the word
+// creates a local buffer for guess (maybe I should have just gave guess more memory)
 void GuessWord(char guess[]) {
-  char buffer[64];
   printf("Your Guess: ");  
-  scanf("%s", buffer);
+  scanf("%s", guess);
 
   // has to guess a valid 5 letter word
-  while (strlen(buffer) != 5) {
+  while (strlen(guess) != 5) {
     printf("Please enter a valid 5 letter word: ");
-    scanf("%s", buffer);
+    scanf("%s", guess);
   }
 
-  strcpy(guess, buffer);
 }
 
 // 
@@ -77,7 +76,7 @@ int main() {
 
   int guesses_left= 6;
   char word[6];
-  char guess[6];
+  char guess[64];
   char positions[6]= {'#', '#', '#', '#', '#', '\0'};
   int  letters_used[5]= {0, 0, 0, 0, 0};
 
