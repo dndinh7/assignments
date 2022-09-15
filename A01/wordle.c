@@ -87,9 +87,6 @@ int main() {
   // initialize the grid of guesses
   char grid[6][6];
   char grid_guess[6][6];
-  for (int i= 0; i < 6; i++) {
-    strcpy(grid[i], "");
-  }
 
   strcpy(word, chooseWord());
   
