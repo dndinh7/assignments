@@ -11,19 +11,20 @@ void instructions() {
 
 // allows the user to guess the word
 void GuessWord(char guess[]) {
+  char buffer[64];
   printf("Your Guess: ");  
-  scanf("%s", guess);
+  scanf("%s", buffer);
 
   // has to guess a valid 5 letter word
-  while (strlen(guess) != 5) {
-    printf("Please enter a valid 5 letter word. \n");
-    scanf("%s", guess);
+  while (strlen(buffer) != 5) {
+    printf("Please enter a valid 5 letter word: ");
+    scanf("%s", buffer);
   }
 
+  strcpy(guess, buffer);
 }
 
-// will return the index of the char if it appears in word
-// else it will return -1
+// 
 void find_chars(char word[], char guess[], char positions[], int letters_used[]) {
   for (int i= 0; i < 5; i++) {
     if (positions[i] == '#') {
@@ -41,6 +42,7 @@ void find_chars(char word[], char guess[], char positions[], int letters_used[])
 
 
 // Iterates over the 5 indices and notes which letters are in the correct position
+// letters_used corresponds to characters in the actual WORD
 void correct_positions(char positions[], char word[], char guess[], int letters_used[]) {
   for (int i= 0; i < strlen(guess); i++) {
     if (word[i] == guess[i]) {
@@ -58,14 +60,16 @@ void reset(char positions[], char guess[], int letters_used[]) {
   }
 }
 
-void print_grid(char grid[][6]) {
+// prints the grid and the word that they previously guessed
+void print_grid(char grid[][6], char grid_guess[][6]) {
   for (int i= 0; i < 6; i++) {
     if (strcmp(grid[i], "")) {    
-    printf("%c %c %c %c %c\n", grid[i][0], grid[i][1], grid[i][2],
-        grid[i][3], grid[i][4]);
+    printf("%c %c %c %c %c (%s)\n", grid[i][0], grid[i][1], grid[i][2],
+        grid[i][3], grid[i][4], grid_guess[i]);
 
     }
   }
+  printf("\n");
 }
 int main() {
   // set seed
@@ -76,9 +80,10 @@ int main() {
   char guess[6];
   char positions[6]= {'#', '#', '#', '#', '#', '\0'};
   int  letters_used[5]= {0, 0, 0, 0, 0};
-  
+
   // initialize the grid of guesses
   char grid[6][6];
+  char grid_guess[6][6];
   for (int i= 0; i < 6; i++) {
     strcpy(grid[i], "");
   }
@@ -88,16 +93,20 @@ int main() {
   instructions();
 
   while (guesses_left > 0) {
+        
     GuessWord(guess);
     if (strcmp(word, guess) == 0) {
       printf("You guessed it!! You Win!\n");
       return 0;
     }
+
+
     correct_positions(positions, word, guess, letters_used);
     find_chars(word, guess, positions, letters_used);
     
     strcpy(grid[6-guesses_left], positions);
-    print_grid(grid);
+    strcpy(grid_guess[6-guesses_left], guess);
+    print_grid(grid, grid_guess);
 
     reset(positions, guess, letters_used);
     
