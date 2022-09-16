@@ -78,6 +78,7 @@ int main() {
   // set seed
   srand(time(0));
 
+
   int guesses_left= 6;
   char word[6];
   char guess[64];
@@ -95,10 +96,6 @@ int main() {
   while (guesses_left > 0) {
         
     GuessWord(guess);
-    if (strcmp(word, guess) == 0) {
-      printf("You guessed it!! You Win!\n");
-      return 0;
-    }
 
 
     correct_positions(positions, word, guess, letters_used);
@@ -108,6 +105,10 @@ int main() {
     strcpy(grid_guess[6-guesses_left], guess);
     print_grid(grid, grid_guess);
 
+    if (strcmp(word, guess) == 0) {
+      printf("You guessed it!! You Win!\n");
+      return 0;
+    }
     reset(positions, guess, letters_used);
     
     guesses_left--;
