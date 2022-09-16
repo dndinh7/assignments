@@ -1,7 +1,9 @@
 Wordle Design:
 
 \# means that the letter is not in the word
+
 \* means that the letter is in the word but in the wrong position
+
 c means that the letter 'c' is in the correct position
 
 e.g. if the word is "apple" and the guess is "allow" then the program
