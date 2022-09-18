@@ -41,6 +41,8 @@ int main() {
 
   }
 
+  printf("\n\n Welcome to Nanami's Favorite List of Restaurants\n\n");
+
   for (int i= 0; i < num_restaurants; i++) {
     print_restaurants(&restaurants[i]);
   }
