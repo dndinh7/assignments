@@ -31,7 +31,6 @@ int main() {
     for (int j= 0; j < 4; j++) {
       val= state[i][j];
       if (val < max) continue; // no need to calculate if less than max
-      
 
       coord= i;
       // shift up
