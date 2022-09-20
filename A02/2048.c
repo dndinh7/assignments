@@ -17,6 +17,7 @@ int main() {
   int state[4][4];
   int val;
   int max= 0;
+  int max_no_shift= 0;
   int coord;
 
 
@@ -31,7 +32,7 @@ int main() {
     for (int j= 0; j < 4; j++) {
       val= state[i][j];
       if (val < max) continue; // no need to calculate if less than max
-
+      if (val > max_no_shift) max_no_shift = val; 
       coord= i;
       // shift up
       while (--coord >= 0 && state[coord][j] == 0);
@@ -57,9 +58,9 @@ int main() {
 
     }
   }
-
-  printf("The largest value that results from a shift is %d.\n", max);
-
+  
+  if (max != 0) printf("The largest value that results from a shift is %d.\n", max);
+  else printf("There was no pair-shift, the largest value on the grid is %d.\n", max_no_shift);
 
 
   return 0;
