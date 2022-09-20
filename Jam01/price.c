@@ -31,6 +31,8 @@ int main() {
 
   int minimum= 10000;
   int idx= -1;
+  // if the guesses are the same, AI1 has highest priority, AI2 has second highest
+  // and user has last priority
   for (int i= 0; i < 3; i++) {
     if (diff[i] > 0 && diff[i] < minimum) {
         idx= i;
