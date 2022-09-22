@@ -12,7 +12,7 @@ struct restaurant {
 
 
 void print_restaurants(struct restaurant* restaurant) {
-  printf("%d) %-29s Opens: %2d:00    Closes: %2d:00    Rating: %.2f\n",
+  printf("%d) %-32s Opens: %02d:00    Closes: %02d:00    Rating: %.2f\n",
     restaurant->id, restaurant->name, restaurant->open_time,
     restaurant->close_time, restaurant->stars);
 
@@ -41,7 +41,7 @@ int main() {
 
   }
 
-  printf("\n\n Welcome to Nanami's Favorite List of Restaurants\n\n");
+  printf("\n\nWelcome to Nanami's Favorite List of Restaurants\n\n");
 
   for (int i= 0; i < num_restaurants; i++) {
     print_restaurants(&restaurants[i]);

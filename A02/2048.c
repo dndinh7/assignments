@@ -60,7 +60,7 @@ int main() {
   }
   
   if (max != 0) printf("The largest value that results from a shift is %d.\n", max);
-  else printf("There was no pair-shift, the largest value on the grid is %d.\n", max_no_shift);
+  else printf("Shifts do not result in a new value. The current largest value on the grid is %d.\n", max_no_shift);
 
 
   return 0;
