@@ -38,6 +38,7 @@ int main() {
     scanf("%d%*c", &restaurants[i].close_time);
     printf("Stars (0 to 5): ");
     scanf("%e%*c", &restaurants[i].stars);
+    printf("\n");
 
   }
 
