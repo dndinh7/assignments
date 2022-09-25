@@ -34,7 +34,7 @@ struct node* insert_sorted(struct restaurant new_rest, struct node* head) {
   }
   
   n->r= new_rest;
-
+  n->next= NULL;
 
   // node is in the start of the list
   if (head == NULL || n->r.rating >= head->r.rating) {
