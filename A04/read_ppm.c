@@ -91,14 +91,14 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
   unsigned char red;
   unsigned char green;
   unsigned char blue;
-  for (int i= 0; i < *w; i++) {
-    for (int j= 0; j < *h; j++) {
+  for (int i= 0; i < *h; i++) {
+    for (int j= 0; j < *w; j++) {
       red= fgetc(input);
       green= fgetc(input);
       blue= fgetc(input);
-      image[i* *h + j].red= red;
-      image[i* *h + j].green= green;
-      image[i* *h + j].blue= blue;
+      image[i* *w + j].red= red;
+      image[i* *w + j].green= green;
+      image[i* *w + j].blue= blue;
     }
   }
 
