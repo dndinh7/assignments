@@ -26,11 +26,11 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
   char *token;
   
 
-  // hard code to get information about ia
+  // hard code to get information about image (header)
 
   while (fgets(line, 80, input) != NULL && row < 3) {
     token= strtok(line, whitespace);
-    if (token[0] == '#') {
+    if (token[0] == '#') { // this line is then a comment, so we skip
       continue;
     }
     if (row == 0) { // check magic number
@@ -81,13 +81,13 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
     break;
   }
   
-  // if it passes this header, then we know there is only one white space after
   image= malloc(sizeof(struct ppm_pixel) * *w * *h);
   if (image == NULL) {
     printf("Not enough space to allocate the image.\n");
     return NULL;
   }
   
+  // each character then is now a color, so we can put them in the struct
   unsigned char red;
   unsigned char green;
   unsigned char blue;
