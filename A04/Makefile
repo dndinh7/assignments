@@ -11,4 +11,4 @@ ascii_image :: ascii_image.c read_ppm.c
 all : test_ppm ascii_image match_braces
 
 clean :
-	rm test_ppm ascii_image 2> /dev/null
+	rm test_ppm ascii_image match_braces 2> /dev/null

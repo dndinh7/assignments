@@ -17,17 +17,15 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
 
   
   struct ppm_pixel* image;
-  //char magic_num[16];
   int max_color= 0;
   int row= 0;
 
   // no line should have more than 70 chars
-  char line[80];
+  char line[81];
   char *token;
+
   
-
   // hard code to get information about image (header)
-
   while (fgets(line, 80, input) != NULL && row < 3) {
     token= strtok(line, whitespace);
     if (token[0] == '#') { // this line is then a comment, so we skip
@@ -76,33 +74,63 @@ struct ppm_pixel* read_ppm(const char* filename, int* w, int* h) {
       printf("Not a valid max color value.\n");
       return NULL;
     }
-    row++;
+    // after we get the max color value, there is only a single white space
     token= strtok(NULL, whitespace);
     break;
   }
-  
+
   image= malloc(sizeof(struct ppm_pixel) * *w * *h);
   if (image == NULL) {
     printf("Not enough space to allocate the image.\n");
     return NULL;
   }
-  
-  // each character then is now a color, so we can put them in the struct
-  unsigned char red;
-  unsigned char green;
-  unsigned char blue;
-  for (int i= 0; i < *h; i++) {
-    for (int j= 0; j < *w; j++) {
-      red= fgetc(input);
-      green= fgetc(input);
-      blue= fgetc(input);
-      image[i* *w + j].red= red;
-      image[i* *w + j].green= green;
-      image[i* *w + j].blue= blue;
+
+  enum color{red, green, blue};
+
+  // this is the case where the whitespace isnt a new line
+  int idx= 0;
+  if (token != NULL) {
+    int n= strlen(token);
+    while (idx < n) {
+      switch(idx%3) {
+        case red:
+          image[idx/3].red= token[idx];
+          break;
+        case green:
+          image[idx/3].green= token[idx];
+          break;
+        case blue:
+          image[idx/3].blue= token[idx];
+          break;
+      }
+      idx++;
     }
   }
+  
+  // after the token string is iterated over, we just go onto the next character
+  // in the file pointer
+  int c;
+  int num_pixels= *w * *h * 3;
+  while ((c= fgetc(input)) != EOF) {
+    // checks if the indices don't go past the number of pixels
+    if (idx >= num_pixels) {
+      printf("The amount of read pixels do not match up to the header pixels.\n");
+      return NULL;
+    }
 
-
+    switch(idx%3) {
+      case red:
+        image[idx/3].red= c;
+        break;
+      case green:
+        image[idx/3].green= c;
+        break;
+      case blue:
+        image[idx/3].blue= c;
+        break; 
+    }
+    idx++;
+  }
 
   fclose(input);
 
