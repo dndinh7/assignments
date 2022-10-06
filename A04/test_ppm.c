@@ -18,7 +18,7 @@ int main() {
     for (int i= 0; i < h; i++) {
       for (int j= 0; j < w; j++) {
         printf("(%u, %u, %u) ", image[i*w + j].red, image[i*w +j].green,
-                                image[i*w + j].blue);
+        image[i*w + j].blue);
 
       }
     printf("\n");
