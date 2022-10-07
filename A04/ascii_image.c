@@ -36,6 +36,10 @@ int main(int argc, char** argv) {
   
   strcpy(file, argv[1]);
   image= read_ppm(file, &w, &h);
+  if (image == NULL) {
+    printf("Something went wrong with reading the file, such that it is NULL.\n");
+    exit(1);
+  }
   printf("Reading %s with width %d and height %d\n", file, w, h);
   
   unsigned char red;

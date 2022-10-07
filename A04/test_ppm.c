@@ -12,7 +12,11 @@ int main() {
 
     strcpy(file, "feep-raw.ppm");
     image= read_ppm(file, &w, &h);
-      
+    if (image == NULL) {
+      printf("File could not be read, and NULL was returned.\n");
+      exit(1);
+    }
+
     printf("Testing file feep-raw.ppm: width %d and height %d\n", w, h);
 
     for (int i= 0; i < h; i++) {
