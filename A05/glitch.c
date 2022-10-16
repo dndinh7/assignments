@@ -96,6 +96,7 @@ void darken_glitch(struct ppm_pixel* image, int w, int h, double alpha) {
   }
 }
 
+// will add a small random amount to each pixel
 void jitter_glitch(struct ppm_pixel* image, int w, int h) {
   unsigned char red_jitter;
   unsigned char green_jitter;
@@ -108,6 +109,42 @@ void jitter_glitch(struct ppm_pixel* image, int w, int h) {
     image[i].green= clamp(image[i].green + green_jitter, 0, 255);
     image[i].blue= clamp(image[i].blue + blue_jitter, 0, 255);
   }
+}
+
+// will move a group of pixels to the left (randomized)
+// used this color palette: https://colorswall.com/palette/1255
+void discolor_glitch(struct ppm_pixel* image, int w, int h) {
+  unsigned char colors[8][3];
+  rgb_color(colors[0], 2, 2, 2);
+  rgb_color(colors[1], 62, 60, 65);
+  rgb_color(colors[2], 253, 254, 254);
+  rgb_color(colors[3], 204, 15, 57);
+  rgb_color(colors[4], 15, 251, 249);
+  rgb_color(colors[5], 194, 191, 204);
+  rgb_color(colors[6], 195, 107, 147);
+  rgb_color(colors[7], 205, 199, 100);
+
+  int p_height= rand() % 20;
+  int p_width= rand() % 20;
+  unsigned char r;
+  unsigned char g;
+  unsigned char b;
+  for (int i= 0; i < w*h; i++) {
+    int rand_color= rand() % 8;
+    r= colors[rand_color][0];
+    g= colors[rand_color][1];
+    b= colors[rand_color][2];
+    p_height= rand() % 20;
+    p_width= rand() % 20;
+    
+    for (int j= i; j < i + p_height * p_width && j < w*h; j++) {
+      image[j].red= interpolate(image[j].red, r, 0.015);
+      image[j].green= interpolate(image[j].green, g, 0.015);
+      image[j].blue= interpolate(image[j].blue, b, 0.015);
+    }      
+  
+  }
+
 }
 
 int main(int argc, char** argv) {
@@ -139,13 +176,15 @@ int main(int argc, char** argv) {
   
 
   
-  
-  //shift_glitch(image, w, h);
-  //rotate_glitch(image, w, h); 
-  jitter_glitch(image, w, h);
-  col_glitch(image, w, h, 0.65); 
+
+  shift_glitch(image, w, h);
+  rotate_glitch(image, w, h); 
+  //jitter_glitch(image, w, h);
+  //col_glitch(image, w, h, 0.50); 
   invert_glitch(image, w, h);
   darken_glitch(image, w, h, 0.4);
+  discolor_glitch(image, w, h);
+
   
   printf("Writing file %s\n", output);
   write_ppm(output, image, w, h);
