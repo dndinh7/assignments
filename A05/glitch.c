@@ -7,7 +7,7 @@
 #include <math.h>
 
 // clamps it between min and max
-int clamp(int a, int min, int max) {
+int clamp(unsigned char a, unsigned char min, unsigned char max) {
   if (a < min) return min;
   else if (a > max) return max;
   return a;
@@ -26,9 +26,11 @@ void shift_glitch(struct ppm_pixel* image, int w, int h) {
 void invert_glitch(struct ppm_pixel* image, int w, int h) {
   unsigned char inverter= 255;
   for (int i= 0; i < w*h; i++) {
+      
     image[i].red= inverter - image[i].red;
     image[i].green= inverter - image[i].green;
     image[i].blue= inverter - image[i].blue;
+    
   }
 }
 
@@ -46,13 +48,20 @@ void rotate_glitch(struct ppm_pixel* image, int w, int h) {
   }
 }
 
+// this will assign the color rgb
 void rgb_color(unsigned char color[], unsigned char r, unsigned char g, unsigned char b) {
   color[0]= r;
   color[1]= g;
   color[2]= b;
 }
 
-void col_glitch(struct ppm_pixel* image, int w, int h) {
+// interpolate the colors
+unsigned char interpolate(unsigned char a, unsigned char b, double alpha) {
+  unsigned char hi= a*(1-alpha) + b*(alpha);
+  return hi;
+}
+
+void col_glitch(struct ppm_pixel* image, int w, int h, double alpha) {
   enum {red, green, blue, yellow, cyan, magenta, orange, yellow_green, cyan_green, cyan_blue, blue_magenta, red_magenta};
   unsigned char colors[12][3];
   rgb_color(colors[red], 255, 0, 0);
@@ -68,10 +77,36 @@ void col_glitch(struct ppm_pixel* image, int w, int h) {
   rgb_color(colors[blue_magenta], 125, 0, 255);
   rgb_color(colors[red_magenta], 255, 0, 255);
   for (int j= 0; j < w; j++) {
-    int rand_rows= rand() % (h/3) + h/2;
-    for (int i= 0; i < h; i++) {
-
+    int rand_rows= rand() % (h/2) + h/3;
+    int rand_color= rand() % 12;
+    for (int i= 0; i < rand_rows; i++) {
+      image[i*w + j].red= interpolate(image[i*w + j].red, colors[rand_color][0], alpha);
+      image[i*w + j].green= interpolate(image[i*w + j].green, colors[rand_color][1], alpha);
+      image[i*w + j].blue= interpolate(image[i*w + j].blue, colors[rand_color][2], alpha);
     }
+  }
+}
+
+// alpha is how much we want to darken the image
+void darken_glitch(struct ppm_pixel* image, int w, int h, double alpha) {
+  for (int i= 0; i < w*h; i++) {
+    image[i].red= interpolate(image[i].red, 0, alpha);
+    image[i].green= interpolate(image[i].green, 0, alpha);
+    image[i].blue= interpolate(image[i].blue, 0, alpha);
+  }
+}
+
+void jitter_glitch(struct ppm_pixel* image, int w, int h) {
+  unsigned char red_jitter;
+  unsigned char green_jitter;
+  unsigned char blue_jitter;
+  for (int i= 0; i < w*h; i++) {
+    red_jitter= rand() % 35;
+    green_jitter= rand() % 35;
+    blue_jitter= rand() % 35;
+    image[i].red= clamp(image[i].red + red_jitter, 0, 255);
+    image[i].green= clamp(image[i].green + green_jitter, 0, 255);
+    image[i].blue= clamp(image[i].blue + blue_jitter, 0, 255);
   }
 }
 
@@ -103,10 +138,14 @@ int main(int argc, char** argv) {
   printf("Reading %s with width %d and height %d\n", input, w, h);
   
 
-
-  //invert_glitch(image, w, h);
+  
+  
   //shift_glitch(image, w, h);
-  //rotate_glitch(image, w, h);  
+  //rotate_glitch(image, w, h); 
+  jitter_glitch(image, w, h);
+  col_glitch(image, w, h, 0.65); 
+  invert_glitch(image, w, h);
+  darken_glitch(image, w, h, 0.4);
   
   printf("Writing file %s\n", output);
   write_ppm(output, image, w, h);
