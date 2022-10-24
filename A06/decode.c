@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
   FILE* file= fopen(input, "r");
   if (!file) {
     printf("File %s cannot be read, exiting\n", argv[1]);
+    exit(1);
   }
 
   int w;
@@ -28,7 +29,10 @@ int main(int argc, char** argv) {
   unsigned char* message= malloc(sizeof(char)*maxChar+1);
   unsigned char mask= 0x1;
 
+
   for (int i= 0; i < w*h*3; i++) {
+    //breaks when we find a terminating character (on the character last finished)
+    if (i - 8 >= 0 && (i-8) % 8 == 0 && message[(i-8)/8] == '\0') break;
     unsigned char bit= image[i] & mask;
     if (bit) {
       bit= bit << (7 - i%8);
@@ -40,6 +44,7 @@ int main(int argc, char** argv) {
       message[i/8]&= bit;
     }
   }
+
   printf("%s", message);
 
 
@@ -47,4 +52,3 @@ int main(int argc, char** argv) {
   free(message);
   return 0;
 }
-
