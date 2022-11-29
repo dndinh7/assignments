@@ -42,6 +42,14 @@ void mandelbrot(struct ppm_pixel* image, struct ppm_pixel* palette,
   }
 }
 
+void init_palette(struct ppm_pixel* palette, int start, int end) {
+  for (; start < end; start++) {
+    palette[start].red= rand() % 255;
+    palette[start].green= rand() % 255;
+    palette[start].blue= rand() % 255;
+  }
+}
+
 int main(int argc, char* argv[]) {
   int size = 480;
   float xmin = -2.0;
@@ -70,120 +78,150 @@ int main(int argc, char* argv[]) {
   printf("  Y range = [%.4f,%.4f]\n", ymin, ymax);
 
   // todo: your code here
-  // generate pallet
+  // generate palette also concurrently
   srand(time(0));
-  struct ppm_pixel* palette= malloc(sizeof(struct ppm_pixel)*(maxIterations+1)); // this is just for ease, when it goes over max iterations I just set the out of range to be black
-  for (int i= 0; i < maxIterations; i++) {
-    palette[i].red= rand() % 255;
-    palette[i].green= rand() % 255;
-    palette[i].blue= rand() % 255;
-  }
-  palette[maxIterations].red= 0;
-  palette[maxIterations].green= 0;
-  palette[maxIterations].blue= 0;
-
-  // after we fork, this will stay in place for each process
-
-  // allocate shared memory of image pixels
-  int shmid;
-  shmid= shmget(IPC_PRIVATE, sizeof(struct ppm_pixel) * size * size, 0644 | IPC_CREAT);
-  if (shmid == -1) {
+  int shpal_id;
+  shpal_id= shmget(IPC_PRIVATE, sizeof(struct ppm_pixel)*(maxIterations+1), 0644 | IPC_CREAT);
+  if (shpal_id == -1) {
     perror("Error: cannot initialize shared memory\n");
     exit(1);
   }
 
-  struct ppm_pixel* image= shmat(shmid, NULL, 0);
-  if (image == (void*)-1) {
+  struct ppm_pixel* palette= shmat(shpal_id, NULL, 0); // this is just for ease, when it goes over max iterations I just set the out of range to be black
+  if (palette == (void*)-1) {
     perror("Error: cannot access shared memory\n");
     exit(1);
   }
 
-
-
-  // compute image
-
-  // timing
-  struct timeval tstart, tend;
-
-  // create processes
-  gettimeofday(&tstart, NULL);
   pid_t pid;
   int child_status;
   pid= fork();
-  printf("Launched child process: %d\n", getpid());
-  if (pid == 0) {
+  if (pid == 0) { // 
     pid= fork();
     if (pid == 0) {
-      printf("Launched child process: %d\n", getpid());
-      pid = fork();
+      pid= fork();
       if (pid == 0) { // 4th child
-        printf("Launched child process: %d\n", getpid());
-        printf("%d) Sub-image block: cols (%d, %d) to rows (%d, %d)\n", getpid(), size/2, size, size/2, size);
-        mandelbrot(image, palette, size/2, size, size/2, size, size, xmin, xmax, ymin, ymax, maxIterations);
-        printf("Child process complete: %d\n", getpid());
-
+        init_palette(palette, 3*maxIterations/4, maxIterations);
       } else { // 3rd child
-        printf("%d) Sub-image block: cols (0, %d) to rows (%d, %d)\n", getpid(), size/2, size/2, size);
-        mandelbrot(image, palette, size/2, size, 0, size/2, size, xmin, xmax, ymin, ymax, maxIterations);
+        init_palette(palette, 2*maxIterations/4, 3*maxIterations/4);
+        pid= wait(&child_status);
+      }
+    } else { // 2nd child
+      init_palette(palette, maxIterations/4, 2*maxIterations/4);
+      pid= wait(&child_status);
+    }
+  } else { // first child
+    init_palette(palette, 0, maxIterations/4);
+    pid= wait(&child_status);
+    palette[maxIterations].red= 0;
+    palette[maxIterations].green= 0;
+    palette[maxIterations].blue= 0;
+
+
+    // allocate shared memory of image pixels
+    int shmid;
+    shmid= shmget(IPC_PRIVATE, sizeof(struct ppm_pixel) * size * size, 0644 | IPC_CREAT);
+    if (shmid == -1) {
+      perror("Error: cannot initialize shared memory\n");
+      exit(1);
+    }
+
+    struct ppm_pixel* image= shmat(shmid, NULL, 0);
+    if (image == (void*)-1) {
+      perror("Error: cannot access shared memory\n");
+      exit(1);
+    }
+
+
+
+    // compute image
+
+    // timing
+    struct timeval tstart, tend;
+
+    // create processes
+    gettimeofday(&tstart, NULL);
+    pid= fork();
+    printf("Launched child process: %d\n", getpid());
+    if (pid == 0) {
+      pid= fork();
+      if (pid == 0) {
+        printf("Launched child process: %d\n", getpid());
+        pid = fork();
+        if (pid == 0) { // 4th child
+          printf("Launched child process: %d\n", getpid());
+          printf("%d) Sub-image block: cols (%d, %d) to rows (%d, %d)\n", getpid(), size/2, size, size/2, size);
+          mandelbrot(image, palette, size/2, size, size/2, size, size, xmin, xmax, ymin, ymax, maxIterations);
+          printf("Child process complete: %d\n", getpid());
+
+        } else { // 3rd child
+          printf("%d) Sub-image block: cols (0, %d) to rows (%d, %d)\n", getpid(), size/2, size/2, size);
+          mandelbrot(image, palette, size/2, size, 0, size/2, size, xmin, xmax, ymin, ymax, maxIterations);
+          printf("Child process complete: %d\n", getpid());
+          pid= wait(&child_status);
+        }
+
+      } else { // 2nd child
+        printf("%d) Sub-image block: cols (%d, %d) to rows (0, %d)\n", getpid(), size/2, size, size/2);
+        mandelbrot(image, palette, 0, size/2, size/2, size, size, xmin, xmax, ymin, ymax, maxIterations);
         printf("Child process complete: %d\n", getpid());
         pid= wait(&child_status);
       }
-
-    } else { // 2nd child
-      printf("%d) Sub-image block: cols (%d, %d) to rows (0, %d)\n", getpid(), size/2, size, size/2);
-      mandelbrot(image, palette, 0, size/2, size/2, size, size, xmin, xmax, ymin, ymax, maxIterations);
-      printf("Child process complete: %d\n", getpid());
+      
+    } else { // 1st child
+      printf("%d) Sub-image block: cols (0, %d) to rows (0, %d)\n", getpid(), size/2, size/2);
+      mandelbrot(image, palette, 0, size/2, 0, size/2, size, xmin, xmax, ymin, ymax, maxIterations);
+      // this is the parent process, which will wait for the four children to end before writing
       pid= wait(&child_status);
+      printf("Child process complete: %d\n", getpid());
+
+      // end of computation
+      gettimeofday(&tend, NULL);
+
+      // this is to write the file name
+      char output[128];
+      time_t t= time(0);
+      strcpy(output, "multi-mandelbrot-");
+
+      char size_s[64];
+      sprintf(size_s, "%d", size);
+
+      char time_s[64];
+      sprintf(time_s, "%ld", t);
+
+      strcat(output, size_s);
+      strcat(output, "-");
+      strcat(output, time_s);
+      strcat(output, ".ppm");
+
+      write_ppm(output, image, size, size);
+
+      // timing
+      double timer= tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec)/1.e6;
+      printf("Computed mandelbrot set (%dx%d) in %g seconds\n", size, size, timer);
+      printf("Writing file: %s\n", output);
+
+      //clean up for shared image pixels
+      if (shmdt(image) == -1) {
+        perror("Error: cannot detach from shared image\n");
+        exit(1);
+      }
+
+      if (shmctl(shmid, IPC_RMID, 0) == -1) {
+        perror("Error: cannot remove shared image\n");
+        exit(1);
+      }
+      
+      // clean up for palette
+      if (shmdt(palette) == -1) {
+        perror("Error: cannot detach from shared palette\n");
+        exit(1);
+      }
+
+      if (shmctl(shpal_id, IPC_RMID, 0) == -1) {
+        perror("Error: cannot remove shared palette");
+        exit(1);
+      }
     }
-    
-  } else { // 1st child
-    printf("%d) Sub-image block: cols (0, %d) to rows (0, %d)\n", getpid(), size/2, size/2);
-    mandelbrot(image, palette, 0, size/2, 0, size/2, size, xmin, xmax, ymin, ymax, maxIterations);
-    // this is the parent process, which will wait for the four children to end before writing
-    pid= wait(&child_status);
-    printf("Child process complete: %d\n", getpid());
-    gettimeofday(&tend, NULL);
-
-    // this is to write the file name
-    char output[128];
-    time_t t= time(0);
-    strcpy(output, "multi-mandelbrot-");
-
-    char size_s[64];
-    sprintf(size_s, "%d", size);
-
-    char time_s[64];
-    sprintf(time_s, "%ld", t);
-
-    strcat(output, size_s);
-    strcat(output, "-");
-    strcat(output, time_s);
-    strcat(output, ".ppm");
-
-    write_ppm(output, image, size, size);
-
-    double timer= tend.tv_sec - tstart.tv_sec + (tend.tv_usec - tstart.tv_usec)/1.e6;
-    printf("Computed mandelbrot set (%dx%d) in %g seconds\n", size, size, timer);
-    printf("Writing file: %s\n", output);
-
-    //clean up for shared image pixels
-    if (shmdt(image) == -1) {
-      perror("Error: cannot detach from shared memory\n");
-      exit(1);
-    }
-
-    if (shmctl(shmid, IPC_RMID, 0) == -1) {
-      perror("Error: cannot remove shared memory\n");
-      exit(1);
-    }
-
-    
-
-    free(palette);
-
-
-  }
-
-
-
+  } 
 }
