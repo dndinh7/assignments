@@ -8,9 +8,11 @@
 #include <string.h>
 
 
-void mandelbrot(struct ppm_pixel* image, struct ppm_pixel* palette, int size, float xmin, float xmax, float ymin, float ymax, int maxIterations) {
-  for (int r= 0; r < size; r++) {
-    for (int c= 0; c < size; c++) {
+void mandelbrot(struct ppm_pixel* image, struct ppm_pixel* palette, 
+  int r_start, int r_end, int c_start, int c_end, // delineates which square we are calculating
+  int size, float xmin, float xmax, float ymin, float ymax, int maxIterations) { // delineates the parameters defined in main
+  for (int r= r_start; r < r_end; r++) {
+    for (int c= c_start; c < c_end; c++) {
       float xfrac = (float)c/(float)size; // this is the x-coordinate based on the columns
       float yfrac = (float)r/(float)size; // this is the y-coordinate based on the rows
       float x0= xmin + xfrac * (xmax - xmin);
@@ -35,8 +37,6 @@ void mandelbrot(struct ppm_pixel* image, struct ppm_pixel* palette, int size, fl
       image[r * size + c]= color;
     }
   }
-
-
 }
 
 int main(int argc, char* argv[]) {
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 
   // timing the function
   gettimeofday(&tstart, NULL);
-  mandelbrot(image, palette, size, xmin, xmax, ymin, ymax, maxIterations);
+  mandelbrot(image, palette, 0, size, 0, size, size, xmin, xmax, ymin, ymax, maxIterations);
   gettimeofday(&tend, NULL);
 
 
