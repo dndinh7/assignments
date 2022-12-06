@@ -34,8 +34,8 @@ struct thread_args {
 void inMandelbrot(struct thread_args* data) { // delineates the parameters defined in main
   for (int r= data->r_start; r < data->r_end; r++) {
     for (int c= data->c_start; c < data->c_end; c++) {
-      float xfrac = (float)c/(float)data->size; // this is the x-coordinate based on the columns
-      float yfrac = (float)r/(float)data->size; // this is the y-coordinate based on the rows
+      float xfrac = ((float)c)/((float)data->size); // this is the x-coordinate based on the columns
+      float yfrac = ((float)r)/((float)data->size); // this is the y-coordinate based on the rows
       float x0= data->xmin + xfrac * (data->xmax - data->xmin);
       float y0= data->ymin + yfrac * (data->ymax - data->ymin);
 
@@ -61,13 +61,12 @@ void inMandelbrot(struct thread_args* data) { // delineates the parameters defin
 }
 
 void visitedCounts(struct thread_args* data) {
-  
   for (int r= data->r_start; r < data->r_end; r++) {
     for (int c= data->c_start; c < data->c_end; c++) {
       if (data->membership[r * data->size + c]) continue;
 
-      float xfrac= (float)c / (float)data->size;
-      float yfrac= (float)r / (float)data->size;
+      float xfrac= ((float)c) / ((float)data->size);
+      float yfrac= ((float)r) / ((float)data->size);
       float x0= data->xmin + xfrac * (data->xmax - data->xmin);
       float y0= data->ymin + yfrac * (data->ymax - data->ymin);
 
@@ -125,7 +124,7 @@ void *start(void* data) {
   visitedCounts(tdata);
   
   pthread_barrier_wait(tdata->barrier);
-  computeColor(data);
+  computeColor(tdata);
 
   printf("Thread %d) finished\n", tdata->id);
   return (void*)0;
