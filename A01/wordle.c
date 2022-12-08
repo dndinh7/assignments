@@ -86,8 +86,10 @@ int main() {
   int  letters_used[5]= {0, 0, 0, 0, 0}; // corresponds to the letters seen in guess
 
   // initialize the grid of guesses
-  char grid[6][6];
+  char grid[6][6]= {"", "", "", "", "", ""};
   char grid_guess[6][6];
+
+
 
   strcpy(word, chooseWord());
   
